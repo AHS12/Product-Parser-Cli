@@ -16,16 +16,16 @@ Composer is used for autoloading classes & tests
 
 #### Get help
 
-```http
+```bash
   php parser.php --help
 ```
 
 #### pass arguments
 
-```http
+```bash
   php parser.php [--file=<filename>] [--unique-combinations=<filename>]
   php parser.php --file="test.csv" --unique-combinations="test.csv"
-  php cliapp.php -f="test.csv" -u="test.csv"
+  php parser.php -f="test.csv" -u="test.csv"
 ```
 
 
