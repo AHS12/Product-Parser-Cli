@@ -13,5 +13,12 @@ use App\App;
 
 $app = new App();
 
+try {
+    //code...
+    $app->runCommand($argv);
+    
+} catch (\Throwable $th) {
+    //throw $th;
+    $app->getPrinter()->display($th->getMessage());
+}
 
-$app->runCommand($argv);

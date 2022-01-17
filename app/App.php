@@ -4,6 +4,7 @@ namespace App;
 
 
 use Services\Printer;
+use Services\CsvParser;
 //use Services\HelpService;
 
 
@@ -11,10 +12,12 @@ use Services\Printer;
 class App
 {
     protected $printer;
+    protected $csvParser;
 
     public function __construct(Printer $printer = null)
     {
         $this->printer = $printer ?: new Printer();
+        $this->csvParser = new CsvParser($this->printer);
     }
 
     public function getPrinter()
@@ -48,19 +51,28 @@ class App
 
         if(isset($options["f"]) || isset($options["file"])) {
             $filename = isset($options["f"]) ? $options["f"] : $options["file"];
+        }else {
+            throw new \Exception("No file specified");
         }
 
         if(isset($options["u"]) || isset($options["unique-combinations"])) {
             $unique = isset($options["u"]) ? $options["u"] : $options["unique-combinations"];
         }
-
-        if(isset($filename)) {
-            $this->printer->display("File: $filename");
+        else 
+        {
+            throw new \Exception("No unique combinations file specified");
         }
 
-        if(isset($unique)) {
-            $this->printer->display("Unique: $unique");
-        }
+        // if(isset($filename)) {
+        //     $this->printer->display("File: $filename");
+        // }
+
+        // if(isset($unique)) {
+        //     $this->printer->display("Unique: $unique");
+        // }
+
+        //csv format parsing
+        $this->csvParser->parse($filename, $unique);
 
 
     }
