@@ -4,6 +4,7 @@ namespace App;
 
 
 use App\Printer;
+use Services\HelpService;
 
 
 
@@ -15,10 +16,6 @@ class App
     {
         $this->printer = $printer ?: new Printer();
     }
-    // public function __construct(Printer $printer)
-    // {
-    //     $this->printer = $printer;
-    // }
 
     public function getPrinter()
     {
@@ -26,54 +23,44 @@ class App
     }
 
 
-    public function registerCommand($name, $callable)
-    {
-        $this->registry[$name] = $callable;
-    }
-
-    public function getCommand($command)
-    {
-        return isset($this->registry[$command]) ? $this->registry[$command] : null;
-    }
-
     public function runCommand(array $argv = [])
     {
-        $command = "--help";
-
-        // if (isset($argv[1])) {
-        //     $command_name = $argv[1];
-        // }
-
-        // $command = $this->getCommand($command_name);
-        // if ($command === null) {
-        //     $this->printer->display("ERROR: Command \"$command_name\" not found.");
-        //     $this->printer->display("Use Command \"help\" to see all available commands.");
-        //     exit;
-        // }
-
-        //call_user_func($command, $argv);
-        print_r($argv);
-
+        
         $short_options = "f:u:h";
-        $long_options = ["filename:", "unique:", "help"];
+        $long_options = ["file:", "unique-combinations:", "help"];
         $options = getopt($short_options, $long_options);
 
-        print_r($options);
+        //print_r($options);
 
-        if(isset($options["f"]) || isset($options["filename"])) {
-            $filename = isset($options["f"]) ? $options["f"] : $options["filename"];
+        //without any argumetns
+        if (empty($options)) {
+            $this->printer->display("Welcome to the product parser");
+            $this->printer->display("Available commands:\n --help - display this help");
+            $this->printer->display("Usage: php parser.php --help");
+            exit;
         }
 
-        if(isset($options["u"]) || isset($options["unique"])) {
-            $unique = isset($options["u"]) ? $options["u"] : $options["unique"];
-        }
-
+        //handle help
         if(isset($options["h"]) || isset($options["help"])) {
-            $this->printer->display("Hello Welcome to the basic cli app");
+            $this->printer->display("Welcome to the product parser");
+            $this->printer->display("Usage: php parser.php [--file=<filename>] [--unique-combinations=<filename>]");
         }
 
-        // print_r($filename);
-        // print_r($unique);
+        if(isset($options["f"]) || isset($options["file"])) {
+            $filename = isset($options["f"]) ? $options["f"] : $options["file"];
+        }
+
+        if(isset($options["u"]) || isset($options["unique-combinations"])) {
+            $unique = isset($options["u"]) ? $options["u"] : $options["unique-combinations"];
+        }
+
+        if(isset($filename)) {
+            $this->printer->display("File: $filename");
+        }
+
+        if(isset($unique)) {
+            $this->printer->display("Unique: $unique");
+        }
 
 
     }

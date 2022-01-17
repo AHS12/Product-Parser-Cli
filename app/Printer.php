@@ -4,7 +4,6 @@ namespace App;
 
 
 
-
 class Printer
 {
     public function out($message)
@@ -21,7 +20,7 @@ class Printer
     {
         $this->newline();
         $this->out($message);
-        $this->newline();
+        //$this->newline();
         $this->newline();
     }
 }

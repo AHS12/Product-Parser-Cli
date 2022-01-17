@@ -1,10 +1,9 @@
-# cliapp-basic-php
+# PRODUCT-PARSER-CLI
 
- A basic shell for creating cli app in php
+ product csv parser app with unique combinations
 
 
-
-## Installation
+## Installation & Setup
 
 Composer is used for autoloading classes & tests
 
@@ -18,13 +17,14 @@ Composer is used for autoloading classes & tests
 #### Get help
 
 ```http
-  php cliapp.php --help
+  php parser.php --help
 ```
 
 #### pass arguments
 
 ```http
-  php cliapp.php --filename="test.csv" --unique="test.csv"
+  php parser.php [--file=<filename>] [--unique-combinations=<filename>]
+  php parser.php --file="test.csv" --unique-combinations="test.csv"
   php cliapp.php -f="test.csv" -u="test.csv"
 ```
 
