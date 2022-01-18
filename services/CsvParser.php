@@ -38,6 +38,20 @@ class CsvParser
         return true;
     }
 
+    private function getUniqueCombinationValues($uniqueFile)
+    {
+        $unique = [];
+        $fileHandle = fopen($uniqueFile, "r");
+        while ($data = fgetcsv($fileHandle)) {
+            //print_r($data);
+            $unique[] = $data;
+        }
+
+        fclose($fileHandle);
+        //skipping the header
+        return $unique[1];
+    }
+
     public function parse(string $file, string $unique)
     {
         $this->file = $file;
@@ -55,54 +69,45 @@ class CsvParser
 
         $this->getPrinter()->display("Parsing file...");
 
-        // $fileHandle = fopen($file, "r");
-        // $fileLineNumber = 1;
-        // while ($rawString = fgets($fileHandle) !== false) {
-        //     var_dump($rawString);
-        //     $row = str_getcsv($rawString);
-        //     print_r($row);
-        //     var_dump($row);
-        //     $this->getPrinter()->display("Line $fileLineNumber: $rawString");
-
-        //     $fileLineNumber++;
-        // }
-
-        // fclose($fileHandle);
-
-
-        //$uniqueFileHandle = fopen($unique, "r");
-
-        $success = $this->fileGetContentsChunked($file,4096,function($chunk,&$handle,$iteration){
+        $uniqueCombinations = $this->getUniqueCombinationValues($this->unique);
+        //print_r($uniqueCombinations);
+        $uniqueCombinationCount = 0;
+        $success = $this->fileGetContentsChunked($file, 4096, function ($chunk, &$handle, $iteration) use ($uniqueCombinations, &$uniqueCombinationCount) {
             /*
                 * Do what you will with the {$chunk} here
                 * {$handle} is passed in case you want to seek to different parts of the file
                 * {$iteration} is the section of the file that has been read so
                 * ($i * 4096) is your current offset within the file.
             */
-            // var_dump($chunk);
+            //var_dump($chunk);
             //print_r($chunk);
-            $array = array_map('str_getcsv', explode("\n", $chunk));
-            print_r($array);
-            //$this->getPrinter()->display("Line $iteration");
-            //$data = fgetcsv($handle);
-            //$data = str_getcsv($chunk);
-            //print_r($data);
-            // print_r(count($data));
-            // foreach ($data as $key => $value) {
-            //     # code...
-            //    // print_r($value);
-            //     //$this->getPrinter()->display("$key: $value");
-            // }
-            print_r($iteration);
             
-        
+            $array = array_map('str_getcsv', explode("\n", $chunk));
+            $arrayCastedRow = (array)$array;
+            foreach ($arrayCastedRow as $row) {
+
+                //var_dump($row);
+                //print_r($row);
+                //print_r($uniqueCombinations);
+               $difference =  array_diff($uniqueCombinations, $row);
+               print_r($difference);
+                if (count($difference) == 0) {
+                    $uniqueCombinationCount++;
+                    $this->getPrinter()->display("Found unique combination: $uniqueCombinationCount");
+                    $this->getPrinter()->display("Unique combination: " . implode(",", $row));
+                    $this->getPrinter()->display("");
+                }
+
+            }
         });
-        
-        if(!$success)
-        {
+
+        if (!$success) {
             //It Failed
+            throw new \Exception("Failed to parse file");
         }
 
         $this->getPrinter()->display("Parsing file done");
+
+        $this->getPrinter()->display("Unique combinations found: $uniqueCombinationCount");
     }
 }
