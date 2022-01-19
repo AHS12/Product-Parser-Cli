@@ -38,19 +38,35 @@ class CsvParser
         return true;
     }
 
-    // private function getUniqueCombinationValues($uniqueFile)
-    // {
-    //     $unique = [];
-    //     $fileHandle = fopen($uniqueFile, "r");
-    //     while ($data = fgetcsv($fileHandle)) {
-    //         //print_r($data);
-    //         $unique[] = $data;
-    //     }
 
-    //     fclose($fileHandle);
-    //     //skipping the header
-    //     return $unique[1];
-    // }
+
+    private function generateKey($row)
+    {
+        $key = implode(",", $row);
+        $key = trim($key);
+        $key = strtolower($key);
+        $key = preg_replace('/\s+/', '', $key);
+
+        return $key;
+    }
+
+    private function parseLines(array $lines, &$uniqueCombinations)
+    {
+        foreach ($lines as $line) {
+            //insert line into new node
+
+            $this->getPrinter()->display('Procressing Row: ' . implode(",", $line));
+            $key = $this->generateKey($line);
+            //print_r($key);
+            if (array_key_exists($key, $uniqueCombinations)) {
+                $uniqueCombinations[$key]['count'] = $uniqueCombinations[$key]['count'] + 1;
+            } else {
+
+                $uniqueCombinations[$key] = $line;
+                $uniqueCombinations[$key]['count'] = 1;
+            }
+        }
+    }
 
     public function parse(string $file, string $unique)
     {
@@ -65,7 +81,7 @@ class CsvParser
         // }
 
         $this->getPrinter()->display("Parsing file: $file");
-       // $this->getPrinter()->display("Unique combinations file: $unique");
+        // $this->getPrinter()->display("Unique combinations file: $unique");
 
         $this->getPrinter()->display("Parsing file started...");
 
@@ -75,50 +91,64 @@ class CsvParser
         $key = 'heading';
         $heading = ['brand_name', 'model_name', 'condition_name', 'grade_name', 'gb_spec_name', 'colour_name', 'network_name', 'count'];
         $uniqueCombinations[$key] = $heading;
-        
-        //$uniqueCombinations[$csvHeading] = $csvHeading;
-        $uniqueCombinationCount = 0;
-       // print_r($uniqueCombinations);
-        $success = $this->fileGetContentsChunked($file, 4096, function ($chunk, &$handle, $iteration) use (&$uniqueCombinations, &$uniqueCombinationCount) {
-            
-            $array = array_map('str_getcsv', explode("\n", $chunk));
-            $arrayCastedRow = (array)$array;
-            foreach ($arrayCastedRow as $row) {
-                $key = implode(",", $row);
-                if(array_key_exists($key, $uniqueCombinations)){
-                    $uniqueCombinations[$key]['count'] = $uniqueCombinations[$key]['count'] + 1;
-                }else{
-                    
-                    $uniqueCombinations[$key] = $row;
-                    $uniqueCombinations[$key]['count'] = 1;
-                }
-                
-                // if (!in_array($key, $uniqueCombinations)) {
-                //     $uniqueCombinations[$key] = $row;
-                //     $uniqueCombinationCount++;
-                // }
 
-                $this->getPrinter()->display("Procressing Row: " . implode(",", $row));
+        //batch operation to conserve memory
+        $numberOfLinesToBatch = 50;
+        $filehandleStream = fopen('products-big-test.csv', 'r');
 
-                //var_dump($row);
-                //print_r($row);
-                //print_r($uniqueCombinations);
-                //    $difference =  array_diff($uniqueCombinations, $row);
-                //    print_r($difference);
-                //     if (count($difference) == 0) {
-                //         $uniqueCombinationCount++;
-                //         $this->getPrinter()->display("Found unique combination: $uniqueCombinationCount");
-                //         $this->getPrinter()->display("Unique combination: " . implode(",", $row));
-                //         $this->getPrinter()->display("");
-                //     }
-
+        $buffer = array();
+        while ($row = fgetcsv($filehandleStream)) {
+            $buffer[] = $row;
+            if (count($buffer) >= $numberOfLinesToBatch) {
+                $this->parseLines($buffer, $uniqueCombinations);
+                $buffer = array();
             }
-        });
-
-        if (!$success) {
-            //It Failed
-            throw new \Exception("Failed to parse file");
         }
+        if (!empty($buffer)) {
+            $this->parseLines($buffer, $uniqueCombinations);
+        }
+
+        fclose($filehandleStream);
+        //if (!$filehandleStream) die('implement better error checking');
+
+
+        //$uniqueCombinations[$csvHeading] = $csvHeading;
+        //$uniqueCombinationCount = 0;
+        // print_r($uniqueCombinations);
+        // $success = $this->fileGetContentsChunked($file, 4096, function ($chunk, &$handle, $iteration) use (&$uniqueCombinations, &$uniqueCombinationCount) {
+
+        //     $array = array_map('str_getcsv', explode("\n", $chunk));
+        //     $arrayCastedRow = (array)$array;
+        //     foreach ($arrayCastedRow as $row) {
+
+        //         $this->getPrinter()->display("Procressing Row: " . implode(",", $row));
+
+        //         $key = $this->generateKey($row);
+        //         //print_r($key);
+        //         if (array_key_exists($key, $uniqueCombinations)) {
+        //             $uniqueCombinations[$key]['count'] = $uniqueCombinations[$key]['count'] + 1;
+        //         } else {
+
+        //             $uniqueCombinations[$key] = $row;
+        //             $uniqueCombinations[$key]['count'] = 1;
+        //         }
+
+        //         // if (!in_array($key, $uniqueCombinations)) {
+        //         //     $uniqueCombinations[$key] = $row;
+        //         //     $uniqueCombinationCount++;
+        //         // }
+
+
+
+
+
+        //     }
+        // });
+
+        // if (!$success) {
+        //     //It Failed
+        //     throw new \Exception("Failed to parse file");
+        // }
 
         $this->getPrinter()->display("Parsing file done");
 
@@ -135,9 +165,12 @@ class CsvParser
 
     private function writeCsv($file, $data)
     {
+        
         $fileHandle = fopen($file, "w");
         foreach ($data as $key => $value) {
+            //print_r($value);
             fputcsv($fileHandle, $value);
+            //fputcsv($fileHandle,["\r\n"]);
         }
         fclose($fileHandle);
     }
