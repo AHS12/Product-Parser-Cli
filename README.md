@@ -11,6 +11,7 @@ Composer is used for autoloading classes & tests
   cd project
   composer dump-autoload
 ```
+Two csv file in included in the project root folder.You can also put your csv into the root folder ase well.then run the parser to generate combination count output csv.Output csv will also be generated into the project root folder.
     
 ## Command Reference
 
@@ -24,8 +25,7 @@ Composer is used for autoloading classes & tests
 
 ```bash
   php parser.php [--file=<filename>] [--unique-combinations=<filename>]
-  php parser.php --file="test.csv" --unique-combinations="test.csv"
-  php parser.php -f="test.csv" -u="test.csv"
+  php parser.php --file="products.csv" --unique-combinations="combination_count.csv"
 ```
 
 
