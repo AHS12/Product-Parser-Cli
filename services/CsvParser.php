@@ -14,11 +14,29 @@ class CsvParser
         $this->printer = $printer ?: new Printer();
     }
 
+    /**
+     * @name getPrinter
+     * @role get the printer
+     * @param 
+     * @return Services\Printer
+     *
+     */
     public function getPrinter()
     {
         return $this->printer;
     }
 
+
+    /* currently unused */
+    /** 
+     * @name fileGetContentsChunked
+     * @role procress the file and get chunked content
+     * @param string $file
+     * @param int $chunkSize
+     * @return callback function
+     * @return boolean
+     *
+     */
     private function fileGetContentsChunked($file, $chunk_size, $callback)
     {
         try {
@@ -40,6 +58,12 @@ class CsvParser
 
 
 
+    /**
+     * @name generateKey
+     * @role procress a line and generate a key
+     * @param array $row
+     * @return string
+     */
     private function generateKey($row)
     {
         $key = implode(",", $row);
@@ -50,6 +74,14 @@ class CsvParser
         return $key;
     }
 
+    /**
+     * @name parseLines
+     * @role parse the lines of the csv file
+     * @param array $lines
+     * @param array $uniqueCombinations
+     * @return void
+     *
+     */
     private function parseLines(array $lines, &$uniqueCombinations)
     {
         foreach ($lines as $line) {
@@ -68,6 +100,14 @@ class CsvParser
         }
     }
 
+    /**
+     * @name parse
+     * @role parse the file(csv)
+     * @param string $filename
+     * @param string $uniqueCombinations filename
+     * @return void
+     *
+     */
     public function parse(string $file, string $unique)
     {
         $this->file = $file;
@@ -76,17 +116,13 @@ class CsvParser
         if (!file_exists($this->file)) {
             throw new \Exception("File not found");
         }
-        // if (!file_exists($this->unique)) {
-        //     throw new \Exception("Unique combinations file not found");
-        // }
+
 
         $this->getPrinter()->display("Parsing file: $file");
-        // $this->getPrinter()->display("Unique combinations file: $unique");
+
 
         $this->getPrinter()->display("Parsing file started...");
 
-        // $uniqueCombinations = $this->getUniqueCombinationValues($this->unique);
-        //print_r($uniqueCombinations);
         $uniqueCombinations = array();
         $key = 'heading';
         $heading = ['brand_name', 'model_name', 'condition_name', 'grade_name', 'gb_spec_name', 'colour_name', 'network_name', 'count'];
@@ -109,46 +145,7 @@ class CsvParser
         }
 
         fclose($filehandleStream);
-        //if (!$filehandleStream) die('implement better error checking');
 
-
-        //$uniqueCombinations[$csvHeading] = $csvHeading;
-        //$uniqueCombinationCount = 0;
-        // print_r($uniqueCombinations);
-        // $success = $this->fileGetContentsChunked($file, 4096, function ($chunk, &$handle, $iteration) use (&$uniqueCombinations, &$uniqueCombinationCount) {
-
-        //     $array = array_map('str_getcsv', explode("\n", $chunk));
-        //     $arrayCastedRow = (array)$array;
-        //     foreach ($arrayCastedRow as $row) {
-
-        //         $this->getPrinter()->display("Procressing Row: " . implode(",", $row));
-
-        //         $key = $this->generateKey($row);
-        //         //print_r($key);
-        //         if (array_key_exists($key, $uniqueCombinations)) {
-        //             $uniqueCombinations[$key]['count'] = $uniqueCombinations[$key]['count'] + 1;
-        //         } else {
-
-        //             $uniqueCombinations[$key] = $row;
-        //             $uniqueCombinations[$key]['count'] = 1;
-        //         }
-
-        //         // if (!in_array($key, $uniqueCombinations)) {
-        //         //     $uniqueCombinations[$key] = $row;
-        //         //     $uniqueCombinationCount++;
-        //         // }
-
-
-
-
-
-        //     }
-        // });
-
-        // if (!$success) {
-        //     //It Failed
-        //     throw new \Exception("Failed to parse file");
-        // }
 
         $this->getPrinter()->display("Parsing file done");
 
@@ -158,14 +155,20 @@ class CsvParser
         $this->writeCsv($unique, $uniqueCombinations);
 
         $this->getPrinter()->display("Writing output csv file done");
-
-        //$this->getPrinter()->display("Unique combinations found: $uniqueCombinationCount");
     }
 
 
+    /** 
+     * @name writeCsv
+     * @role write the csv file
+     * @param string $filename
+     * @param array $data
+     * @return void
+     *
+     */
     private function writeCsv($file, $data)
     {
-        
+
         $fileHandle = fopen($file, "w");
         foreach ($data as $key => $value) {
             //print_r($value);

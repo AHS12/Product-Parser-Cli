@@ -6,6 +6,7 @@ namespace Services;
 
 class Printer
 {
+
     public function out($message)
     {
         echo $message;
@@ -16,6 +17,14 @@ class Printer
         $this->out("\n");
     }
 
+
+    /**
+     * @name display
+     * @role display a message in the console
+     * @param string $message
+     * @return void
+     *
+     */
     public function display($message)
     {
         $this->newline();

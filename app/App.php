@@ -20,12 +20,26 @@ class App
         $this->csvParser = new CsvParser($this->printer);
     }
 
+    /**
+     * @name getPrinter
+     * @role get the printer
+     * @param 
+     * @return Services\Printer
+     *
+     */
     public function getPrinter()
     {
         return $this->printer;
     }
 
 
+    /**
+     * @name runCommand
+     * @role run the command
+     * @param array $argv
+     * @return void
+     *
+     */
     public function runCommand(array $argv = [])
     {
         
@@ -62,14 +76,6 @@ class App
         {
             throw new \Exception("No unique combinations file specified");
         }
-
-        // if(isset($filename)) {
-        //     $this->printer->display("File: $filename");
-        // }
-
-        // if(isset($unique)) {
-        //     $this->printer->display("Unique: $unique");
-        // }
 
         //csv format parsing
         $this->csvParser->parse($filename, $unique);
